@@ -1,27 +1,30 @@
-import { useState, useEffect } from 'react';
+// Main.tsx
+
+import React, { useState, useEffect } from 'react';
 import '../App.css';
 import type { Posts } from '../interface';
-import { fetchData,itemsPerPage } from '../fetching/fetch';
-import { Link } from 'react-router-dom';
+import { fetchData, itemsPerPage } from '../fetching/fetch';
+import { Link, useNavigate } from 'react-router-dom';
 
 function Main() {
   const [posts, setPosts] = useState<Posts[]>([]);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [showLoadMoreButton, setShowLoadMoreButton] = useState<boolean>(false);
-  const [loadingMore, setLoadingMore] = useState<boolean>(false); 
+  const [loadingMore, setLoadingMore] = useState<boolean>(false);
+  const navigate = useNavigate(); 
 
   const handleScroll = () => {
     const scrollY = window.scrollY;
     const windowHeight = window.innerHeight;
     const documentHeight = document.documentElement.scrollHeight;
-    if (scrollY + windowHeight >= documentHeight - 100 && !loadingMore && !showLoadMoreButton) { 
+    if (scrollY + windowHeight >= documentHeight - 100 && !loadingMore && !showLoadMoreButton) {
       setLoadingMore(true);
       setCurrentPage(prevPage => prevPage + 1);
     }
-  }; 
+  };
 
   const handleLoadMoreClick = () => {
-    setLoadingMore(true); 
+    setLoadingMore(true);
     setCurrentPage(prevPage => prevPage + 1);
   };
 
@@ -30,15 +33,16 @@ function Main() {
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
-  }, [posts, loadingMore, showLoadMoreButton]); 
+  }, [posts, loadingMore, showLoadMoreButton]);
 
   useEffect(() => {
     fetchData(currentPage)
       .then(newPosts => {
-        setTimeout(() => { 
+        setTimeout(() => {
           setPosts(prevPosts => [...prevPosts, ...newPosts]);
           setLoadingMore(false);
-          document.title = `Page ${currentPage}`; 
+          document.title = `Page ${currentPage}`;
+          navigate(`/page/${currentPage}`);
         }, 500); // Задержка в 0.5 секунд
       });
   }, [currentPage]);
@@ -52,14 +56,14 @@ function Main() {
       <ul className='container'>
         {posts.map((post) => (
           <div className='Main' key={post.id}>
-            <h1>TITLE {post.title}</h1> 
+            <h1>TITLE {post.title}</h1>
             <h2>ID {post.id}</h2>
-            <Link to={`/${post.id}`}>Details</Link>
+            <Link to={`/details/${post.id}`}>Details</Link>
           </div>
         ))}
       </ul>
       {showLoadMoreButton && (
-        <button onClick={handleLoadMoreClick}>Load More</button> 
+        <button onClick={handleLoadMoreClick}>Load More</button>
       )}
     </div>
   );
