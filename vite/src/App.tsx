@@ -38,6 +38,7 @@ function App() {
         setTimeout(() => { 
           setPosts(prevPosts => [...prevPosts, ...newPosts]);
           setLoadingMore(false);
+          document.title = `Page ${currentPage}`; 
         }, 500); // Задержка в 0.5 секунд
       });
   }, [currentPage]);
